@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
+	<script src="https://kit.fontawesome.com/fa76d837d2.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+	<link rel="stylesheet" href="./css/styles.css">
+    <title>Smartcity/Smartbin</title>
+    
+<script>
+setTimeout(function(){
+   window.location.reload(10);
+}, 60000);  // refresh after every 20 seconds
+</script>
+</head>
+
+<body>
+    
+	<i class="fa-solid fa-recycle"></i> <h1>Smart bin for Smart city</h1><i class="fa-solid 1fa-recycle"></i>
+<!-- This is the message received from MQTT brocker:    <%= JSON.stringify(message) %>  -->
+
+
+<div id='map'></div>
+
+<script>
+
+	var message = <%- JSON.stringify(message) %>;
+
+	var map = L.map('map').setView([50.3755, -4.1427], 13); // plymouth city centre gps coordinates
+
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+	var LeafIcon = L.Icon.extend({
+		options: {
+			iconSize:     [30, 45],
+			shadowSize:   [30, 45],
+			iconAnchor:   [30, 45],	
+			popupAnchor:  [-3, -76]
+		}
+	});
+
+	var greenIcon = new LeafIcon({iconUrl: './images/Green_Bin.png'});
+    var redIcon = new LeafIcon({iconUrl: './images/Red_Bin.png'});
+    var orangeIcon = new LeafIcon({iconUrl: './images/Amber_Bin.png'});
+
+	var binIcon;
+	var note = "";
+	for (i=0;i<message.length;i++){
+
+		if (message[i].level == "0"){
+		binIcon = greenIcon;
+		note="";
+		}
+		if (message[i].level == "1"){
+		binIcon = orangeIcon;
+		note="";
+		}
+		if (message[i].level == "2"){
+		binIcon = redIcon;
+		note="Bin ready to collect";
+		}
+
+		var lat = message[i].lat;
+		var long = message[i].long;
+		var mGreen = L.marker([lat, long], {icon: binIcon}).bindPopup(lat+':'+long+' '+note).addTo(map);
+		}
+</script>
+
+</body>
+</html>
